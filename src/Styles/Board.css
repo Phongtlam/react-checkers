@@ -26,6 +26,14 @@
   border-radius: 50%;
 }
 
+.board-square-highlight-1, .board-square-highlight-2 {
+  border: 2px dashed #ff0000;
+}
+
+.board-square-highlight-2 {
+  border-color: #1e90ff;
+}
+
 .board-square-1 {
   background-color: #ff0000;
 }
@@ -33,3 +41,5 @@
 .board-square-2 {
   background-color: #1e90ff;
 }
+
+

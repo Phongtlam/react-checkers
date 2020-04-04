@@ -88,3 +88,13 @@ export const classNames = (...args) => {
   }
   return res.join(' ');
 };
+
+export const getRowsWithHighlights = (highlightMoves) => {
+  const rowWithHighlights = {};
+  for (let i = 0; i < highlightMoves.length; i++) {
+    let t = highlightMoves[i];
+    rowWithHighlights[t[0]] = rowWithHighlights[t[0]] || [];
+    rowWithHighlights[t[0]].push(t[1]);
+  }
+  return rowWithHighlights;
+};
