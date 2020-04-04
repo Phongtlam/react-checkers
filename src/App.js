@@ -1,6 +1,8 @@
 import React from 'react';
 import './App.css';
 import Board from './Components/Board';
+import { getNewBoard, getMovesForPiece } from './utils';
+import { PLAYERS } from './enums';
 
 class App extends React.Component {
   constructor(props) {
@@ -8,8 +10,10 @@ class App extends React.Component {
     this.state = {
       lastBoard: [],
       board: [],
-      turn: "P1"
+      turn: PLAYERS.P1,
+      highlightMoves: [],
     };
+    this.onPieceSelected = this.onPieceSelected.bind(this);
   }
 
   componentDidMount() {
@@ -17,49 +21,31 @@ class App extends React.Component {
   }
 
   initializeBoard() {
-    const board = [];
-    for (let i = 0; i < 8; i++) {
-      board[i] = [];
-      for (let j = 0; j < 8; j++) {
-        board[i][j] = "_";
-        if (i % 2 !== j % 2) {
-          if (i < 3) board[i][j] = "P2";
-          if (i > 4) board[i][j] = "P1";
-        }
-      }
-    }
     this.setState({
-      board,
-      turn: "P1"
+      board: getNewBoard(),
+      turn: PLAYERS.P1,
     });
   }
 
-  updateBoard(newBoard) {
-    const {
-      board,
-      turn
-    } = this.state;
-    let newTurn = turn === "P1" ? "P2" : "P1";
+  onPieceSelected(coordinate) {
+    const { board, turn } = this.state;
+    const { x, y } = coordinate;
     this.setState({
-      lastBoard: board,
-      board: newBoard,
-      turn: newTurn
-    })
+      highlightMoves: getMovesForPiece(board, x, y),
+    });
   }
 
-  getNextBoard(selectedPiece) {
-
-  };
-
   render() {
-    const {
-      board,
-      turn
-    } = this.state;
+    const { board, turn, highlightMoves } = this.state;
 
     return (
-      <Board board={board} turn={turn} />
-    )
+      <Board
+        board={board}
+        turn={turn}
+        onPieceSelected={this.onPieceSelected}
+        highlightMoves={highlightMoves}
+      />
+    );
   }
 }
 

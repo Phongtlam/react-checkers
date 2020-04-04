@@ -26,10 +26,10 @@
   border-radius: 50%;
 }
 
-.board-square-P1 {
+.board-square-1 {
   background-color: #ff0000;
 }
 
-.board-square-P2 {
+.board-square-2 {
   background-color: #1e90ff;
 }
