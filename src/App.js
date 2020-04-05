@@ -54,6 +54,7 @@ class App extends React.Component {
   onPieceDrop(to) {
     const { highlightMoves, board, turn, currentlySelected } = this.state;
     const { x, y } = to;
+    if (x === currentlySelected[0] && y === currentlySelected[1]) return;
     for (let i = 0; i < highlightMoves.length; i++) {
       let move = highlightMoves[i];
       if (move[0] === x && move[1] === y) {
@@ -62,12 +63,9 @@ class App extends React.Component {
         replacePiece(newBoard, currentlySelected[0], currentlySelected[1], '.');
         // handle jump over
         if (Math.abs(x - currentlySelected[0]) > 1) {
-          let xOffSet = turn === PLAYERS.P1 ? 1 : -1;
-          if (y < currentlySelected[1]) {
-            replacePiece(newBoard, x + xOffSet, y + 1, '.');
-          } else if (y > currentlySelected[1]) {
-            replacePiece(newBoard, x + xOffSet, y - 1, '.');
-          }
+          let xOffset = x - currentlySelected[0] > 0 ? -1 : 1;
+          let yOffset = y < currentlySelected[1] ? 1 : -1;
+          replacePiece(newBoard, x + xOffset, y + yOffset, '.');
         }
         // king check
         if (x === 0 && turn === PLAYERS.P1) replacePiece(newBoard, x, y, PLAYERS.K1);

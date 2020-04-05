@@ -27,13 +27,15 @@ export const getNewBoard = () => {
 };
 
 export const getMovesForPiece = (board, i, j, turn) => {
-  if (board[i][j] !== PLAYERS.P1 && board[i][j] !== PLAYERS.P2) return [];
-  if (board[i][j] !== turn) return [];
+  if (checkPlayer(board[i][j]) !== PLAYERS.P1 && checkPlayer(board[i][j]) !== PLAYERS.P2) return [];
+  if (checkPlayer(board[i][j]) !== turn) return [];
   let nextMoves = [];
-  let rowToMove = board[i][j] === PLAYERS.P1 ? i - 1 : i + 1;
-  let currOpp = board[i][j] === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1;
-  let rowToAttackOffset = board[i][j] === PLAYERS.P1 ? -1 : 1;
-
+  let rowToMove = checkPlayer(board[i][j]) === PLAYERS.P1 ? i - 1 : i + 1;
+  let currOpp = checkPlayer(board[i][j]) === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1;
+  let rowToAttackOffset = checkPlayer(board[i][j]) === PLAYERS.P1 ? -1 : 1;
+  if (board[i][j] === PLAYERS.K1 || board[i][j] === PLAYERS.K2) {
+    return getKingMoves(board, [i, j]);
+  }
   if (
     !board[rowToMove] ||
     i < 0 ||
@@ -57,14 +59,16 @@ export const getMovesForPiece = (board, i, j, turn) => {
       board[rowToMove][j - 1] === currOpp &&
       board[rowToMove + rowToAttackOffset] &&
       board[rowToMove + rowToAttackOffset][j - 2] === '.'
-    )
+    ) {
       nextMoves.push([rowToMove + rowToAttackOffset, j - 2]);
+    }
     if (
       board[rowToMove][j + 1] === currOpp &&
       board[rowToMove + rowToAttackOffset] &&
       board[rowToMove + rowToAttackOffset][j + 2] === '.'
-    )
+    ) {
       nextMoves.push([rowToMove + rowToAttackOffset, j + 2]);
+    }
 
     if (
       !board[rowToMove + rowToAttackOffset] ||
@@ -72,13 +76,70 @@ export const getMovesForPiece = (board, i, j, turn) => {
         !nextMoves.length &&
         (board[rowToMove + rowToAttackOffset][j - 2] !== '.' ||
           board[rowToMove + rowToAttackOffset][j + 2] !== '.'))
-    )
+    ) {
       normalMove();
+    }
   } else {
     normalMove();
   }
 
   return nextMoves;
+};
+
+export const getKingMoves = (board, pieceCoordinate) => {
+  const [x, y] = pieceCoordinate;
+  let res = [];
+
+  function fillMoves(rowIdx, lower = false) {
+    let row = board[rowIdx];
+    for (let j = 0; j < row.length; j++) {
+      if (Math.abs(x - rowIdx) === Math.abs(y - j)) {
+        if (limit.left && limit.right) break;
+        if (row[j] === ".") {
+          if (limit.left && j - y < 0) continue;
+          if (limit.right && j - y > 0) continue;
+          res.push([rowIdx, j]);
+        } else {
+          if (!limit.left && j - y < 0) {
+            limit.left = true;
+            if (checkPlayer(row[j]) !== checkPlayer(board[x][y])) {
+              if (lower && board[rowIdx - 1] && board[rowIdx - 1][j - 1] === ".") {
+                res.push([rowIdx - 1, j - 1]);
+              }
+              if (!lower && board[rowIdx + 1] && board[rowIdx + 1][j - 1] === ".") {
+                res.push([rowIdx + 1, j - 1]);
+              }
+            }
+          }
+          if (!limit.right && j - y > 0) {
+            limit.right = true;
+            if (checkPlayer(row[j]) !== checkPlayer(board[x][y])) {
+              if (lower && board[rowIdx - 1] && board[rowIdx - 1][j + 1] === ".") {
+                res.push([rowIdx - 1, j + 1]);
+              }
+              if (!lower && board[rowIdx + 1] && board[rowIdx + 1][j + 1] === ".") {
+                res.push([rowIdx + 1, j + 1]);
+              }
+            }
+          }
+        }
+      }
+    }
+    console.log(limit)
+  }
+
+  let limit = {};
+  for (let i = x + 1; i < board.length; i++) {
+    fillMoves(i, false);
+  }
+
+  limit = {};
+  for (let i = x - 1; i >= 0; i--) {
+    fillMoves(i, true);
+  }
+
+  console.log('res return', res)
+  return res;
 };
 
 export const replacePiece = (board, i, j, newPiece) => {
@@ -110,11 +171,12 @@ export const getRowsWithHighlights = (highlightMoves = []) => {
 };
 
 export const checkPlayer = (playerPiece) => {
+  if (playerPiece === ".") return;
   let num;
   if (typeof playerPiece === 'string') {
     num = Number(playerPiece);
   } else {
     num = playerPiece;
   }
-  return num % 2 === 0 ? PLAYERS.P1 : PLAYERS.P2;
+  return num % 2 === 0 ? PLAYERS.P2 : PLAYERS.P1;
 };
