@@ -13,12 +13,14 @@ class App extends React.Component {
       turn: PLAYERS.P1,
       highlightMoves: [],
       currentlySelected: [],
-      lastGameStates: []
+      lastGameStates: [],
+      isAi: false
     };
     this.onPieceSelected = this.onPieceSelected.bind(this);
     this.onPieceDrop = this.onPieceDrop.bind(this);
     this.revertLastMove = this.revertLastMove.bind(this);
     this.initializeBoard = this.initializeBoard.bind(this);
+    this.toggleAi = this.toggleAi.bind(this);
   }
 
   componentDidMount() {
@@ -97,8 +99,14 @@ class App extends React.Component {
     }
   }
 
+  toggleAi() {
+    this.setState({
+      isAi: !this.state.isAi
+    })
+  }
+
   render() {
-    const { board, turn, highlightMoves } = this.state;
+    const { board, turn, highlightMoves, isAi } = this.state;
 
     return (
       <div className="game-container">
@@ -110,9 +118,13 @@ class App extends React.Component {
           onPieceDrop={this.onPieceDrop}
         />
         <div className="game-footer">
-          <span>Current Player Turn: {turn === PLAYERS.P1 ? 'PLAYER ONE' : 'PLAYER TWO'}</span>
+          <div>
+            <p>Current Player Turn: {turn === PLAYERS.P1 ? 'PLAYER ONE' : 'PLAYER TWO'}</p>
+            <p>AI IS {isAi ? 'ON' : 'OFF'}</p>
+          </div>
           <Button onClick={this.revertLastMove} text={`REVERT LAST MOVE`}/>
           <Button onClick={this.initializeBoard} text={`NEW GAME`}/>
+          <Button onClick={this.toggleAi} text={`AI ${isAi ? 'ON' : 'OFF'}`} className={isAi ? 'ai-button-on' : 'ai-button-off'} />
         </div>
       </div>
     );

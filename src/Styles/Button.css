@@ -5,3 +5,12 @@
 	color: #fff;
 	margin: 0 50px;
 }
+
+.ai-button-off {
+	background-color: #ff0000;
+}
+
+.ai-button-on {
+	background-color: #adff2f;
+	color: #000;
+}

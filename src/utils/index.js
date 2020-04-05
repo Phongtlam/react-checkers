@@ -125,7 +125,6 @@ export const getKingMoves = (board, pieceCoordinate) => {
         }
       }
     }
-    console.log(limit)
   }
 
   let limit = {};
