@@ -137,7 +137,6 @@ export const getKingMoves = (board, pieceCoordinate) => {
     fillMoves(i, true);
   }
 
-  console.log('res return', res)
   return res;
 };
 

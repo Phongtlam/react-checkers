@@ -4,6 +4,7 @@ import Board from './Components/Board';
 import { getNewBoard, getMovesForPiece, replacePiece } from './utils';
 import { PLAYERS } from './enums';
 import Button from './Components/Button';
+import { aiMove } from "./ai";
 
 class App extends React.Component {
   constructor(props) {
@@ -30,6 +31,15 @@ class App extends React.Component {
     } else {
       this.initializeBoard();
     }
+    // document.addEventListener("unload", this.saveToLocalStorage);
+  }
+
+  // componentWillUnmount() {
+  //   document.removeEventListener("unload", this.saveToLocalStorage);
+  // }
+
+  static saveToLocalStorage(state) {
+    localStorage.setItem('react-checker', JSON.stringify(state));
   }
 
   initializeBoard() {
@@ -63,20 +73,23 @@ class App extends React.Component {
     });
   }
 
-  onPieceDrop(to) {
-    const { highlightMoves, board, turn, currentlySelected } = this.state;
+  onPieceDrop(to, from) {
+    const { highlightMoves, board, turn, currentlySelected, isAi } = this.state;
+    if (!from) {
+      from = currentlySelected
+    }
     const { x, y } = to;
-    if (x === currentlySelected[0] && y === currentlySelected[1]) return;
+    if (x === from[0] && y === from[1]) return;
     for (let i = 0; i < highlightMoves.length; i++) {
       let move = highlightMoves[i];
       if (move[0] === x && move[1] === y) {
         let newBoard = [...board];
-        replacePiece(newBoard, x, y, board[currentlySelected[0]][currentlySelected[1]]);
-        replacePiece(newBoard, currentlySelected[0], currentlySelected[1], '.');
+        replacePiece(newBoard, x, y, board[from[0]][from[1]]);
+        replacePiece(newBoard, from[0], from[1], '.');
         // handle jump over
-        if (Math.abs(x - currentlySelected[0]) > 1) {
-          let xOffset = x - currentlySelected[0] > 0 ? -1 : 1;
-          let yOffset = y < currentlySelected[1] ? 1 : -1;
+        if (Math.abs(x - from[0]) > 1) {
+          let xOffset = x - from[0] > 0 ? -1 : 1;
+          let yOffset = y < from[1] ? 1 : -1;
           replacePiece(newBoard, x + xOffset, y + yOffset, '.');
         }
         // king check
@@ -85,16 +98,33 @@ class App extends React.Component {
 
         this.setState((prevState) => {
           const newState = {
-            lastGameStates: prevState.lastGameStates.concat(prevState),
             board: newBoard,
             turn: prevState.turn === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1,
             highlightMoves: [],
-            currentlySelected: [],
+            currentlySelected: []
           };
-          localStorage.setItem('react-checker', JSON.stringify(newState));
-          return newState
+          App.saveToLocalStorage(newState);
+          newState.lastGameStates = prevState.lastGameStates.concat(prevState);
+          return newState;
+        }, () => {
+          this.runAI();
         });
         break;
+      }
+    }
+  }
+
+  runAI() {
+    const { board, isAi } = this.state;
+    if (isAi && this.state.turn === PLAYERS.P2) {
+      const aiAction = aiMove(board);
+      if (aiAction) {
+        this.setState({
+          highlightMoves: [aiAction.to],
+          currentlySelected: aiAction.from
+        }, () => {
+          this.onPieceDrop({ x: aiAction.to[0], y: aiAction.to[1] }, aiAction.from);
+        });
       }
     }
   }
