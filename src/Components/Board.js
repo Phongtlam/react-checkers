@@ -11,7 +11,7 @@ import { PLAYERS } from '../enums';
 const Board = ({ board, highlightMoves, ...otherProps }) => {
   const rowsWithHighlights = getRowsWithHighlights(highlightMoves);
   return (
-    <div>
+    <div className="board-container">
       {board.map((row, i) => (
         <Row
           key={i}

@@ -3,6 +3,7 @@ import './App.css';
 import Board from './Components/Board';
 import { getNewBoard, getMovesForPiece, replacePiece } from './utils';
 import { PLAYERS } from './enums';
+import Button from './Components/Button';
 
 class App extends React.Component {
   constructor(props) {
@@ -87,7 +88,7 @@ class App extends React.Component {
     const { board, turn, highlightMoves } = this.state;
 
     return (
-      <div>
+      <div className="game-container">
         <Board
           board={board}
           turn={turn}
@@ -95,8 +96,10 @@ class App extends React.Component {
           highlightMoves={highlightMoves}
           onPieceDrop={this.onPieceDrop}
         />
-        <button onClick={this.revertLastMove}>REVERT LAST MOVE</button>
-        <button onClick={this.initializeBoard}>NEW GAME</button>
+        <div className="game-footer">
+          <Button onClick={this.revertLastMove} text={`REVERT LAST MOVE`}/>
+          <Button onClick={this.initializeBoard} text={`NEW GAME`}/>
+        </div>
       </div>
     );
   }

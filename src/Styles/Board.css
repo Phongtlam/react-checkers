@@ -1,3 +1,7 @@
+.board-container {
+  border: 5px solid #000;
+}
+
 .board-row {
   display: flex;
 }
