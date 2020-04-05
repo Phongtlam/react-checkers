@@ -22,7 +22,12 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.initializeBoard();
+    const lsGame = localStorage.getItem('react-checker');
+    if (lsGame) {
+      this.setState(JSON.parse(lsGame));
+    } else {
+      this.initializeBoard();
+    }
   }
 
   initializeBoard() {
@@ -32,6 +37,8 @@ class App extends React.Component {
       highlightMoves: [],
       currentlySelected: [],
       lastGameStates: []
+    }, () => {
+      localStorage.removeItem('react-checker');
     });
   }
 
@@ -40,6 +47,8 @@ class App extends React.Component {
     let pop = this.state.lastGameStates.pop();
     this.setState({
       ...pop
+    }, () => {
+      localStorage.setItem('react-checker', JSON.stringify(pop));
     })
   }
 
@@ -72,13 +81,17 @@ class App extends React.Component {
         if (x === 0 && turn === PLAYERS.P1) replacePiece(newBoard, x, y, PLAYERS.K1);
         if (x === 7 && turn === PLAYERS.P2) replacePiece(newBoard, x, y, PLAYERS.K2);
 
-        this.setState((prevState) => ({
-          lastGameStates: prevState.lastGameStates.concat(prevState),
-          board: newBoard,
-          turn: prevState.turn === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1,
-          highlightMoves: [],
-          currentlySelected: [],
-        }));
+        this.setState((prevState) => {
+          const newState = {
+            lastGameStates: prevState.lastGameStates.concat(prevState),
+            board: newBoard,
+            turn: prevState.turn === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1,
+            highlightMoves: [],
+            currentlySelected: [],
+          };
+          localStorage.setItem('react-checker', JSON.stringify(newState));
+          return newState
+        });
         break;
       }
     }
@@ -97,6 +110,7 @@ class App extends React.Component {
           onPieceDrop={this.onPieceDrop}
         />
         <div className="game-footer">
+          <span>Current Player Turn: {turn === PLAYERS.P1 ? 'PLAYER ONE' : 'PLAYER TWO'}</span>
           <Button onClick={this.revertLastMove} text={`REVERT LAST MOVE`}/>
           <Button onClick={this.initializeBoard} text={`NEW GAME`}/>
         </div>

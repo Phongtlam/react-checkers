@@ -4,7 +4,6 @@ import {
   classNames,
   getColor,
   getRowsWithHighlights,
-  checkPlayer,
 } from '../utils';
 import { PLAYERS } from '../enums';
 
@@ -86,13 +85,12 @@ const Square = ({
             playerPiece === PLAYERS.P1 || playerPiece === PLAYERS.K1,
           'board-square-2':
             playerPiece === PLAYERS.P2 || playerPiece === PLAYERS.K2,
-          // 'board-square-K1': playerPiece === PLAYERS.K1,
-          // 'board-square-K2': playerPiece === PLAYERS.K2,
         })}
         draggable={isDraggable}
         onDragStart={onDragStart}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onMouseOver={onDragStart}
       >
         {(playerPiece === PLAYERS.K1 || playerPiece === PLAYERS.K2) && (
           <span>KING</span>
