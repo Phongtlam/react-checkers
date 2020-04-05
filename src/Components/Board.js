@@ -1,9 +1,14 @@
 import React from 'react';
 import '../Styles/Board.css';
-import { classNames, getColor, getRowsWithHighlights } from '../utils';
+import {
+  classNames,
+  getColor,
+  getRowsWithHighlights,
+  checkPlayer,
+} from '../utils';
 import { PLAYERS } from '../enums';
 
-const Board = ({ board, turn, onPieceSelected, highlightMoves }) => {
+const Board = ({ board, highlightMoves, ...otherProps }) => {
   const rowsWithHighlights = getRowsWithHighlights(highlightMoves);
   return (
     <div>
@@ -12,17 +17,15 @@ const Board = ({ board, turn, onPieceSelected, highlightMoves }) => {
           key={i}
           xCoord={i}
           row={row}
-          turn={turn}
-          highlightMoves={highlightMoves}
-          onPieceSelected={onPieceSelected}
           hasHighlightedSquares={rowsWithHighlights[i]}
+          {...otherProps}
         />
       ))}
     </div>
   );
 };
 
-const Row = ({ xCoord, row, turn, onPieceSelected, hasHighlightedSquares }) => {
+const Row = ({ xCoord, row, hasHighlightedSquares, ...otherProps }) => {
   const squares = [];
   function checkHighlight(index) {
     return !!(
@@ -37,9 +40,8 @@ const Row = ({ xCoord, row, turn, onPieceSelected, hasHighlightedSquares }) => {
         xCoord={xCoord}
         yCoord={i}
         playerPiece={row[i]}
-        turn={turn}
-        onPieceSelected={onPieceSelected}
         isHighlighted={checkHighlight(i)}
+        {...otherProps}
       />
     );
   }
@@ -53,11 +55,22 @@ const Square = ({
   onPieceSelected,
   isHighlighted,
   turn,
+  onPieceDrop,
 }) => {
   const isDraggable = playerPiece !== '.';
   function onDragStart() {
     onPieceSelected({ x: xCoord, y: yCoord });
   }
+
+  function onDrop(ev) {
+    ev.preventDefault();
+    onPieceDrop({ x: xCoord, y: yCoord });
+  }
+
+  function onDragOver(ev) {
+    ev.preventDefault();
+  }
+
   return (
     <div
       className={classNames(
@@ -66,15 +79,25 @@ const Square = ({
       )}
     >
       <div
-        className={classNames('board-square-player-piece', {
+        className={classNames('board-square-player-piece', 'board-square-K1', {
           'board-square-highlight-1': isHighlighted && turn === PLAYERS.P1,
           'board-square-highlight-2': isHighlighted && turn === PLAYERS.P2,
-          'board-square-1': playerPiece === PLAYERS.P1,
-          'board-square-2': playerPiece === PLAYERS.P2,
+          'board-square-1':
+            playerPiece === PLAYERS.P1 || playerPiece === PLAYERS.K1,
+          'board-square-2':
+            playerPiece === PLAYERS.P2 || playerPiece === PLAYERS.K2,
+          // 'board-square-K1': playerPiece === PLAYERS.K1,
+          // 'board-square-K2': playerPiece === PLAYERS.K2,
         })}
         draggable={isDraggable}
         onDragStart={onDragStart}
-      />
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+      >
+        {(playerPiece === PLAYERS.K1 || playerPiece === PLAYERS.K2) && (
+          <span>KING</span>
+        )}
+      </div>
     </div>
   );
 };

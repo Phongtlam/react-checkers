@@ -26,47 +26,56 @@ export const getNewBoard = () => {
   return board;
 };
 
-// export const getP1Moves = board => {
-//   let newBoard = [];
-//   for (let i = board.length; i >= 0; i--) {
-//     const currRow = board[i];
-//     for (let j = 0; j < currRow.length; j++) {
-//       if (currRow[j] === PLAYERS.P1) {
-//         getMovesForPiece(board, i, j).forEach(move => {
-//           replacePiece(board, i, j, PLAYERS.P2)
-//         });
-//       }
-//     }
-//   }
-// };
-
-export const getMovesForPiece = (board, i, j) => {
-  if (board[i][j] !== PLAYERS.P1 && board[i][j] !== PLAYERS.P2) return;
+export const getMovesForPiece = (board, i, j, turn) => {
+  if (board[i][j] !== PLAYERS.P1 && board[i][j] !== PLAYERS.P2) return [];
+  if (board[i][j] !== turn) return [];
   let nextMoves = [];
   let rowToMove = board[i][j] === PLAYERS.P1 ? i - 1 : i + 1;
   let currOpp = board[i][j] === PLAYERS.P1 ? PLAYERS.P2 : PLAYERS.P1;
+  let rowToAttackOffset = board[i][j] === PLAYERS.P1 ? -1 : 1;
 
-  if (board[rowToMove]) {
+  if (
+    !board[rowToMove] ||
+    i < 0 ||
+    j < 0 ||
+    i > board.length - 1 ||
+    j > board[0].length - 1
+  )
+    return [];
+
+  function normalMove() {
+    if (board[rowToMove][j - 1] === '.') nextMoves.push([rowToMove, j - 1]);
+    if (board[rowToMove][j + 1] === '.') nextMoves.push([rowToMove, j + 1]);
+  }
+
+  // can attack opponent piece
+  if (
+    board[rowToMove][j - 1] === currOpp ||
+    board[rowToMove][j + 1] === currOpp
+  ) {
     if (
-      board[rowToMove][j - 1] === currOpp ||
-      board[rowToMove][j + 1] === currOpp
-    ) {
-      if (
-        board[rowToMove][j - 1] === currOpp &&
-        board[rowToMove - 1] &&
-        board[rowToMove - 1][j - 2]
-      )
-        nextMoves.push([rowToMove - 1, j - 2]);
-      if (
-        board[rowToMove][j + 1] === currOpp &&
-        board[rowToMove - 1] &&
-        board[rowToMove - 1][j + 2]
-      )
-        nextMoves.push([rowToMove - 1, j + 2]);
-    } else {
-      if (board[rowToMove][j - 1] === '.') nextMoves.push([rowToMove, j - 1]);
-      if (board[rowToMove][j + 1] === '.') nextMoves.push([rowToMove, j + 1]);
-    }
+      board[rowToMove][j - 1] === currOpp &&
+      board[rowToMove + rowToAttackOffset] &&
+      board[rowToMove + rowToAttackOffset][j - 2] === '.'
+    )
+      nextMoves.push([rowToMove + rowToAttackOffset, j - 2]);
+    if (
+      board[rowToMove][j + 1] === currOpp &&
+      board[rowToMove + rowToAttackOffset] &&
+      board[rowToMove + rowToAttackOffset][j + 2] === '.'
+    )
+      nextMoves.push([rowToMove + rowToAttackOffset, j + 2]);
+
+    if (
+      !board[rowToMove + rowToAttackOffset] ||
+      (board[rowToMove + rowToAttackOffset] &&
+        !nextMoves.length &&
+        (board[rowToMove + rowToAttackOffset][j - 2] !== '.' ||
+          board[rowToMove + rowToAttackOffset][j + 2] !== '.'))
+    )
+      normalMove();
+  } else {
+    normalMove();
   }
 
   return nextMoves;
@@ -89,7 +98,8 @@ export const classNames = (...args) => {
   return res.join(' ');
 };
 
-export const getRowsWithHighlights = (highlightMoves) => {
+export const getRowsWithHighlights = (highlightMoves = []) => {
+  if (!highlightMoves.length) return {};
   const rowWithHighlights = {};
   for (let i = 0; i < highlightMoves.length; i++) {
     let t = highlightMoves[i];
@@ -97,4 +107,14 @@ export const getRowsWithHighlights = (highlightMoves) => {
     rowWithHighlights[t[0]].push(t[1]);
   }
   return rowWithHighlights;
+};
+
+export const checkPlayer = (playerPiece) => {
+  let num;
+  if (typeof playerPiece === 'string') {
+    num = Number(playerPiece);
+  } else {
+    num = playerPiece;
+  }
+  return num % 2 === 0 ? PLAYERS.P1 : PLAYERS.P2;
 };
