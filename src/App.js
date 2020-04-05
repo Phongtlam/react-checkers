@@ -74,7 +74,7 @@ class App extends React.Component {
   }
 
   onPieceDrop(to, from) {
-    const { highlightMoves, board, turn, currentlySelected, isAi } = this.state;
+    const { highlightMoves, board, turn, currentlySelected } = this.state;
     if (!from) {
       from = currentlySelected
     }
